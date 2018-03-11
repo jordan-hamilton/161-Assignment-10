@@ -4,6 +4,8 @@
  ** Description: Class implementation file template.
  *********************************************************************/
 
+ #include "Customer.hpp"
+
  Customer::Customer(std::string nameIn, std::string accountIDIn, bool premiumMemberIn) {
    name = nameIn;
    accountID = accountIDIn;

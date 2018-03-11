@@ -4,6 +4,8 @@
  ** Description: Class implementation file template.
  *********************************************************************/
 
+ #include "Product.hpp"
+
 Product::Product(std::string idCodeIn, std::string titleIn, std::string descriptionIn, double priceIn, int quantityIn) {
   idCode = idCodeIn;
   title = titleIn;
