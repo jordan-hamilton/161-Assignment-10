@@ -4,10 +4,6 @@
  ** Description: Class implementation file template.
  *********************************************************************/
 
-/** A Product object represents a product with an ID code, title,
- ** description, price and quantity available.
- **/
-
 Product::Product(std::string idCodeIn, std::string titleIn, std::string descriptionIn, double priceIn, int quantityIn) {
   idCode = idCodeIn;
   title = titleIn;
