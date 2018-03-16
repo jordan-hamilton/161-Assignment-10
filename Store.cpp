@@ -1,10 +1,14 @@
 /*********************************************************************
  ** Author: Jordan Hamilton
- ** Date: 03/08/2018
- ** Description: Class implementation file template.
+ ** Date: 03/15/2018
+ ** Description: This implements a class representing a store. Data
+ ** members include vectors that represent the product inventory and
+ ** customers who are store members. Methods add pointers to products
+ ** and customer objects to the vectors, search for products and
+ ** members by ID, search for products by title or description
+ **
  *********************************************************************/
 
-#include <iostream>
 #include <algorithm>
 #include <cctype>
 
@@ -13,47 +17,44 @@
 void Store::addProduct(Product* ptrProduct) {
   if (ptrProduct) {
       inventory.push_back(ptrProduct);
-      std::cout << "Product added." << std::endl;
   }
 }
 
 void Store::addMember(Customer* ptrCustomer) {
   if (ptrCustomer) {
     members.push_back(ptrCustomer);
-    std::cout << "Member added." << std::endl;
   }
 }
 
 Product* Store::getProductFromID(std::string idCodeSearch) {
+
   for (Product* product : inventory) {
+
     if (product) {
-      std::cout << "Product ID found: " << product->getIdCode() << std::endl;
+
       if (idCodeSearch == product->getIdCode()) {
-        std::cout << "Product ID " << idCodeSearch << " found in the store at the following memory location: " << std::endl;
         return product;
-    }
+      }
 
     }
   }
-  std::cout << "Couldn't detect product ID " << idCodeSearch << std::endl;
-  return NULL;
 
+  // Return NULL if no product ID matched during the for loop.
+  return NULL;
 }
 
 Customer* Store::getMemberFromID(std::string accountIDSearch) {
 
   for (Customer* customer : members) {
 
-    // Loop through the
     if (customer) {
-      std::cout << "Account ID found: " << customer->getAccountID() << std::endl;
       if (accountIDSearch == customer->getAccountID()) {
-        std::cout << "Account ID " << accountIDSearch << " found in the store at the following memory location: " << std::endl;
         return customer;
       }
     }
   }
-  std::cout << "Couldn't detect account ID " << accountIDSearch << std::endl;
+
+  // Return NULL if no account ID matched during the for loop.
   return NULL;
 }
 
@@ -74,15 +75,15 @@ std::vector<std::string> Store::productSearch(std::string search) {
     tempString.at(0) = std::tolower(tempString.at(0));
   }
 
+  // Loop through all products in the inventory vector to find a match.
   for (Product* product : inventory) {
     if (product) {
 
       // Access the product's getTitle method if the pointer was
-      // valid, then search the return value for the string passed
+      // valid, then search the returned string for the string passed
       // and our temporary string. Add the product's ID to the end
       // of our method's vector if the search if found.
       if (product->getTitle().find(search) != std::string::npos || product->getTitle().find(tempString) != std::string::npos) {
-        std::cout << "Found " << search << " by title: ID Code " << product->getIdCode() << std::endl;
         productCodes.push_back(product->getIdCode());
       } else if (product->getDescription().find(search) != std::string::npos || product->getDescription().find(tempString) != std::string::npos) {
 
@@ -90,17 +91,13 @@ std::vector<std::string> Store::productSearch(std::string search) {
         // description if we couldn't find our search parameter in
         // the product's title.
         productCodes.push_back(product->getIdCode());
-        std::cout << "Found this product by description: ID Code " << product->getIdCode() << std::endl;
-      } else {
-        std::cout << "Couldn't find a product matching the word " << search << " in this iteration." << std::endl;
       }
     }
   }
 
+  // Sort the vector of matching products, then return the vector.
   std::sort(productCodes.begin(), productCodes.end());
-  for (int count = 0; count < productCodes.size(); count++) {
-    std::cout << "productCodes: " << productCodes.at(count) << std::endl;
-  }
+
   return productCodes;
 }
 
@@ -118,19 +115,57 @@ std::string Store::addProductToMemberCart(std::string idCodeIn, std::string acco
 }
 
 double Store::checkOutMember(std::string accountIDIn) {
-  //If the member ID isn't found, return -1.  Otherwise return the
-  //charge for the member's cart.  This will be the total cost of
-  //all the items in the cart, not including any items that are not
-  //in the inventory or are out of stock, plus the shipping cost.
-  //If a product is not out of stock, you should add its cost to the
-  //total and decrease the available quantity of that product by 1.
-  //Note that it is possible for an item to go out of stock during
-  //checkout.  For example, if the customer has two of the same
-  //product in their cart, but the store only has one of that product
-  //left, the customer will be able to buy the one that's available,
-  //but won't be able to buy a second one, because it's now out of stock.
-  //For premium members, the shipping cost is $0.  For normal members,
-  //the shipping cost is 7% of the total cost of the items in the cart.
-  //When the charge for the member's cart has been tabulated, the member's
-  //cart should be emptied, and the charge amount returned.
+
+  // Define and initialize an accumulator for the total cost of the
+  // cart and a counter of items we'll need to process while looping
+  // through the cart vector.
+  double total = 0.0;
+  int items = 0;
+
+  // Define pointer varaibles for the customer and the products
+  // in this customer's cart.
+  Customer* payingCustomer;
+  Product* productInCart;
+
+  // Return a flag value if we couldn't find the account in our
+  // members vector.
+  if ( !getMemberFromID(accountIDIn) ) {
+    return -1;
+  } else {
+
+    // Assign the customer to our pointer variable if we found the ID
+    // in the members vector.
+    payingCustomer = getMemberFromID(accountIDIn);
+
+    // Loop through the cart vector to process all product ID codes.
+    while ( items < payingCustomer->getCart().size() ) {
+
+      if ( getProductFromID( payingCustomer->getCart().at(items) ) ) {
+
+        // If the product is found in inventory, assign it to our pointer variable.
+        productInCart = getProductFromID( payingCustomer->getCart().at(items) );
+
+        if ( productInCart->getQuantityAvailable() > 0 ) {
+
+          // If the product is still in stock, add its price to the total
+          // and decrease the quantity in the inventory.
+          total += productInCart->getPrice();
+          productInCart->decreaseQuantity();
+        }
+      }
+
+      items++;
+    }
+  }
+
+  // Empty the customer's cart now that we've processed all items.
+  payingCustomer->emptyCart();
+
+  // Return the total after looping through the cart vector, but add
+  // the shipping cost if the customer wasn't a premium member.
+  if (payingCustomer->isPremiumMember()) {
+    return total;
+  } else {
+    return total * 1.07;
+  }
 }
