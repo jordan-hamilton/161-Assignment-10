@@ -41,7 +41,10 @@ Product* Store::getProductFromID(std::string idCodeSearch) {
 }
 
 Customer* Store::getMemberFromID(std::string accountIDSearch) {
+
   for (Customer* customer : members) {
+
+    // Loop through the
     if (customer) {
       std::cout << "Account ID found: " << customer->getAccountID() << std::endl;
       if (accountIDSearch == customer->getAccountID()) {
@@ -56,6 +59,8 @@ Customer* Store::getMemberFromID(std::string accountIDSearch) {
 
 std::vector<std::string> Store::productSearch(std::string search) {
 
+  // Define a vector of strings we'll use to store then return products
+  // that match our search.
   std::vector<std::string> productCodes;
 
   // Create a temporary string with the opposite case on the first
@@ -100,18 +105,32 @@ std::vector<std::string> Store::productSearch(std::string search) {
 }
 
 std::string Store::addProductToMemberCart(std::string idCodeIn, std::string accountIDIn) {
-  /* If the product isn't found in the inventory, return "product ID not found".
-     If the member isn't found in the members, return "member ID not found".
-     If both are found and the product is still available, call the member's
-     addProductToCart method to add the product and then return "product added
-     to cart". If the product was not still available, return "product out of
-     stock". This function does not need to check how many of that product are
-     available - just that there is at least one. It should also not change how
-     many are available - that happens during checkout.  The same product can be
-     added multiple times if the customer wants more than one of something. */
-
+     if (!getProductFromID(idCodeIn)) {
+       return "product ID not found";
+     } else if (!getMemberFromID(accountIDIn)) {
+       return "member ID not found";
+     } else if (getProductFromID(idCodeIn)->getQuantityAvailable() < 1) {
+       return "product out of stock";
+     } else {
+       getMemberFromID(accountIDIn)->addProductToCart(idCodeIn);
+       return "product added to cart";
+     }
 }
 
 double Store::checkOutMember(std::string accountIDIn) {
-
+  //If the member ID isn't found, return -1.  Otherwise return the
+  //charge for the member's cart.  This will be the total cost of
+  //all the items in the cart, not including any items that are not
+  //in the inventory or are out of stock, plus the shipping cost.
+  //If a product is not out of stock, you should add its cost to the
+  //total and decrease the available quantity of that product by 1.
+  //Note that it is possible for an item to go out of stock during
+  //checkout.  For example, if the customer has two of the same
+  //product in their cart, but the store only has one of that product
+  //left, the customer will be able to buy the one that's available,
+  //but won't be able to buy a second one, because it's now out of stock.
+  //For premium members, the shipping cost is $0.  For normal members,
+  //the shipping cost is 7% of the total cost of the items in the cart.
+  //When the charge for the member's cart has been tabulated, the member's
+  //cart should be emptied, and the charge amount returned.
 }
