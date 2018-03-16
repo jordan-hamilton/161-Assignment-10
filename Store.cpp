@@ -5,27 +5,45 @@
  ** members include vectors that represent the product inventory and
  ** customers who are store members. Methods add pointers to products
  ** and customer objects to the vectors, search for products and
- ** members by ID, search for products by title or description
- **
+ ** members by ID, search for products by title or description,
+ ** add products to a member's cart, and check out a member by totaling
+ ** the items in their cart.
  *********************************************************************/
+
 
 #include <algorithm>
 #include <cctype>
 
 #include "Store.hpp"
 
+
+/*********************************************************************
+** Description: Adds a pointer to a product object into the inventory
+** vector if the pointer is not null.
+*********************************************************************/
 void Store::addProduct(Product* ptrProduct) {
   if (ptrProduct) {
       inventory.push_back(ptrProduct);
   }
 }
 
+
+/*********************************************************************
+** Description: Adds a pointer to a customer object into the members
+** vector if the pointer is not null.
+*********************************************************************/
 void Store::addMember(Customer* ptrCustomer) {
   if (ptrCustomer) {
     members.push_back(ptrCustomer);
   }
 }
 
+
+/*********************************************************************
+** Description: Returns a pointer to a product object if the string
+** passed to the method matches the ID code of a product found in the
+** inventory vector. Otherwise, this returns NULL.
+*********************************************************************/
 Product* Store::getProductFromID(std::string idCodeSearch) {
 
   for (Product* product : inventory) {
@@ -33,31 +51,50 @@ Product* Store::getProductFromID(std::string idCodeSearch) {
     if (product) {
 
       if (idCodeSearch == product->getIdCode()) {
-        return product;
-      }
 
+        return product;
+
+      }
     }
   }
 
-  // Return NULL if no product ID matched during the for loop.
+  // Return NULL if no product ID was matched and returned
+  // during the for loop.
   return NULL;
 }
 
+
+/*********************************************************************
+** Description: Returns a pointer to a customer object if the string
+** passed to the method matches the ID code of a customer found in the
+** members vector. Otherwise, this returns NULL.
+*********************************************************************/
 Customer* Store::getMemberFromID(std::string accountIDSearch) {
 
   for (Customer* customer : members) {
 
     if (customer) {
+
       if (accountIDSearch == customer->getAccountID()) {
+
         return customer;
+
       }
     }
   }
 
-  // Return NULL if no account ID matched during the for loop.
+  // Return NULL if no account ID was matched and returned
+  // during the for loop.
   return NULL;
 }
 
+
+/*********************************************************************
+** Description: Returns a vector of strings containing product ID
+** codes of any product(s) is found in the inventory vector with a
+** title or description containing the string passed to the method,
+** with a case-insensitive first character.
+*********************************************************************/
 std::vector<std::string> Store::productSearch(std::string search) {
 
   // Define a vector of strings we'll use to store then return products
@@ -101,19 +138,42 @@ std::vector<std::string> Store::productSearch(std::string search) {
   return productCodes;
 }
 
+
+/*********************************************************************
+** Description: Attempts to add a product to a customer's cart if the
+** product is in stock, and the product's ID and account's ID were
+** both found within the store's respective data members using
+** getProductFromID and getMemberFromID methods. Returns a string
+** with the result of the attempt to add the product to the customer's
+** cart.
+*********************************************************************/
 std::string Store::addProductToMemberCart(std::string idCodeIn, std::string accountIDIn) {
+
      if (!getProductFromID(idCodeIn)) {
+
        return "product ID not found";
      } else if (!getMemberFromID(accountIDIn)) {
+
        return "member ID not found";
      } else if (getProductFromID(idCodeIn)->getQuantityAvailable() < 1) {
+
        return "product out of stock";
      } else {
+
        getMemberFromID(accountIDIn)->addProductToCart(idCodeIn);
        return "product added to cart";
      }
+
 }
 
+
+/*********************************************************************
+** Description: Attempts to total all the items in the customer's cart
+** by looping through the cart via the customer's getCart method.
+** Adds shipping costs to the total if the customer with the account
+** ID passed to the method is not denoted as a premium member.
+** Returns -1 if the account wasn't found in the members vector.
+*********************************************************************/
 double Store::checkOutMember(std::string accountIDIn) {
 
   // Define and initialize an accumulator for the total cost of the
@@ -122,7 +182,7 @@ double Store::checkOutMember(std::string accountIDIn) {
   double total = 0.0;
   int items = 0;
 
-  // Define pointer varaibles for the customer and the products
+  // Define pointer variables for the customer and the products
   // in this customer's cart.
   Customer* payingCustomer;
   Product* productInCart;
